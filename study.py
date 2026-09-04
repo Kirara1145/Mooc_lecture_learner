@@ -48,19 +48,25 @@ def click_play_button() -> bool:
 
     offsets = (0, 0), (-40, 0), (40, 0), (0, -40), (0, 40), (0, -80), (0, 80)
 
-    for attempt in range(config.MAX_PLAY_RETRY):
+    def click_once(attempt: int) -> None:
         matched = template.find_template(config.VIDEO_ROI)
         if matched:
             x, y, score = matched
             log(f"[图像匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
-            screen.click(x, y)
         else:
             dx, dy = offsets[attempt % len(offsets)]
             x, y = cx + dx, cy + dy
             log(f"[坐标回退] 点击 ({x}, {y})")
-            screen.click(x, y)
+        screen.click(x, y)
 
-        time.sleep(config.POLL_INTERVAL)
+    if not config.VERIFY_PLAYBACK:
+        click_once(0)
+        log("已关闭播放验证，视为开始播放")
+        return True
+
+    for attempt in range(config.MAX_PLAY_RETRY):
+        click_once(attempt)
+        time.sleep(config.PLAY_VERIFY_DELAY)
         if is_playing():
             log("视频开始播放")
             return True
