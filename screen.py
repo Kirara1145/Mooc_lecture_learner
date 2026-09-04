@@ -4,6 +4,9 @@ import numpy as np
 import pyautogui
 
 import window
+from logger import get_logger
+
+logger = get_logger("screen")
 
 
 def _enable_dpi_awareness() -> None:
@@ -32,7 +35,7 @@ def screenshot() -> np.ndarray:
 
 
 def click(x: int, y: int) -> None:
-    print(f"[screen] 点击坐标: ({x}, {y})")
+    logger.info(f"点击坐标: ({x}, {y})")
     pyautogui.click(x, y)
 
 

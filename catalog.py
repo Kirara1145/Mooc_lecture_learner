@@ -4,6 +4,9 @@ import time
 import config
 import ocr_engine
 import screen
+from logger import get_logger
+
+logger = get_logger("catalog")
 
 ITEM_RE = re.compile(r"^\d")
 LETTER_RE = re.compile(r"[\u4e00-\u9fa5A-Za-z]")
@@ -74,7 +77,7 @@ def collect_leaf_numbers() -> set:
         time.sleep(1)
 
     leaves = filter_leaves(numbers)
-    print(f"[catalog] 共识别 {len(numbers)} 个编号，其中最低级 {len(leaves)} 个")
+    logger.info(f"共识别 {len(numbers)} 个编号，其中最低级 {len(leaves)} 个")
     return leaves
 
 

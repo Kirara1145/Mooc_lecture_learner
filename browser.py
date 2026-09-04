@@ -3,6 +3,9 @@ import subprocess
 import sys
 
 import config
+from logger import get_logger
+
+logger = get_logger("browser")
 
 
 def find_chrome() -> str:
@@ -24,7 +27,7 @@ def open_url(url: str = None) -> subprocess.Popen:
     if proc.poll() is not None:
         raise RuntimeError("Chrome 启动失败")
 
-    print(f"[browser] 已启动 Chrome: {url}")
+    logger.info(f"已启动 Chrome: {url}")
     return proc
 
 
@@ -32,5 +35,5 @@ if __name__ == "__main__":
     try:
         open_url()
     except Exception as exc:
-        print(f"[browser] 错误: {exc}", file=sys.stderr)
+        logger.error(f"{exc}")
         sys.exit(1)

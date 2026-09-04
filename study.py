@@ -1,4 +1,3 @@
-import os
 import re
 import time
 
@@ -7,19 +6,9 @@ import config
 import ocr_engine
 import screen
 import template
+from logger import get_logger
 
-LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "study.log")
-
-
-def log(message: str) -> None:
-    line = f"[{time.strftime('%H:%M:%S')}] {message}"
-    print(line)
-    try:
-        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
-        with open(LOG_FILE, "a", encoding="utf-8") as f:
-            f.write(line + "\n")
-    except OSError:
-        pass
+logger = get_logger("study")
 
 
 def is_completed() -> bool:
@@ -52,26 +41,26 @@ def click_play_button() -> bool:
         matched = template.find_template(config.VIDEO_ROI)
         if matched:
             x, y, score = matched
-            log(f"[图像匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
+            logger.info(f"[图像匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
         else:
             dx, dy = offsets[attempt % len(offsets)]
             x, y = cx + dx, cy + dy
-            log(f"[坐标回退] 点击 ({x}, {y})")
+            logger.info(f"[坐标回退] 点击 ({x}, {y})")
         screen.click(x, y)
 
     if not config.VERIFY_PLAYBACK:
         click_once(0)
-        log("已关闭播放验证，视为开始播放")
+        logger.info("已关闭播放验证，视为开始播放")
         return True
 
     for attempt in range(config.MAX_PLAY_RETRY):
         click_once(attempt)
         time.sleep(config.PLAY_VERIFY_DELAY)
         if is_playing():
-            log("视频开始播放")
+            logger.info("视频开始播放")
             return True
 
-    log("未能确认视频开始播放，请人工检查")
+    logger.info("未能确认视频开始播放，请人工检查")
     return False
 
 
@@ -89,7 +78,7 @@ def run() -> None:
 
     leaf_numbers = catalog.collect_leaf_numbers()
     if not leaf_numbers:
-        log("未识别到最低级课程编号，请确认已登录并停留在学习通课程页")
+        logger.info("未识别到最低级课程编号，请确认已登录并停留在学习通课程页")
         return
 
     catalog.scroll_to_top()
@@ -99,7 +88,7 @@ def run() -> None:
     while True:
         items = catalog.visible_items()
         if not items:
-            log("右侧目录无课程项，结束")
+            logger.info("右侧目录无课程项，结束")
             break
 
         target = None
@@ -115,31 +104,31 @@ def run() -> None:
             time.sleep(1)
             after = [t for t, _, _ in catalog.visible_items()]
             if not after or after == before:
-                log("目录已到底，结束")
+                logger.info("目录已到底，结束")
                 break
             continue
 
         title, cx, cy = target
         number = catalog.parse_number(title)
-        log(f"处理课程: {title}")
+        logger.info(f"处理课程: {title}")
 
         screen.click(cx, cy)
         time.sleep(config.WAIT_SECONDS)
 
         if is_completed():
-            log("已显示任务完成，跳过")
+            logger.info("已显示任务完成，跳过")
         else:
             click_play_button()
             if wait_completion(config.COURSE_TIMEOUT):
-                log(f"完成: {title}")
+                logger.info(f"完成: {title}")
             else:
-                log(f"超时未完成: {title}，请人工处理，处理后按回车继续")
+                logger.info(f"超时未完成: {title}，请人工处理，处理后按回车继续")
                 input()
 
         done.add(number)
-        log(f"已处理 {len(done)} 项")
+        logger.info(f"已处理 {len(done)} 项")
 
-    log("全部课程处理完毕")
+    logger.info("全部课程处理完毕")
 
 
 if __name__ == "__main__":
