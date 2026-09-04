@@ -1,0 +1,9 @@
+.venv
+__pycache__
+*.pyc
+.chrome-data
+.git
+.DS_Store
+.dockerignore
+logs/
+*.pyo

@@ -61,18 +61,6 @@ def click_play_button() -> bool:
     return False
 
 
-def click_item(title: str) -> bool:
-    for _ in range(5):
-        pos = catalog.locate_item(title)
-        if pos:
-            log(f"点击课程项 {title} 于 {pos}")
-            screen.click(*pos)
-            return True
-        time.sleep(1)
-    log(f"未能定位课程项: {title}")
-    return False
-
-
 def wait_completion(timeout: int) -> bool:
     deadline = time.time() + timeout
     while time.time() < deadline:
@@ -83,33 +71,50 @@ def wait_completion(timeout: int) -> bool:
 
 
 def run() -> None:
-    titles = catalog.collect_catalog()
-    if not titles:
-        log("右侧目录未识别到课程项，请确认已登录并停留在学习通课程页")
-        return
+    catalog.scroll_to_top()
 
-    for title in titles:
+    done = set()
+
+    while True:
+        items = catalog.visible_items()
+        if not items:
+            log("右侧目录无课程项，结束")
+            break
+
+        target = None
+        for item in items:
+            if item[0] not in done:
+                target = item
+                break
+
+        if target is None:
+            before = [t for t, _, _ in items]
+            screen.scroll_in_roi(config.CATALOG_ROI, config.SCROLL_STEPS)
+            time.sleep(1)
+            after = [t for t, _, _ in catalog.visible_items()]
+            if not after or after == before:
+                log("目录已到底，结束")
+                break
+            continue
+
+        title, cx, cy = target
         log(f"处理课程: {title}")
 
-        if is_completed():
-            log("该课程已刷过，跳过")
-            continue
-
-        if not click_item(title):
-            continue
+        screen.click(cx, cy)
         time.sleep(config.WAIT_SECONDS)
 
         if is_completed():
-            log("已显示完成状态，跳过播放")
-            continue
-
-        click_play_button()
-
-        if wait_completion(config.COURSE_TIMEOUT):
-            log(f"完成: {title}")
+            log("已显示任务完成，跳过")
         else:
-            log(f"超时未完成: {title}，请人工处理，处理后按回车继续")
-            input()
+            click_play_button()
+            if wait_completion(config.COURSE_TIMEOUT):
+                log(f"完成: {title}")
+            else:
+                log(f"超时未完成: {title}，请人工处理，处理后按回车继续")
+                input()
+
+        done.add(title)
+        log(f"已处理 {len(done)} 项")
 
     log("全部课程处理完毕")
 

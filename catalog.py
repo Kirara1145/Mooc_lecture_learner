@@ -74,3 +74,30 @@ def locate_item(title: str):
             cy = int(box[:, 1].mean())
             return cx, cy
     return None
+
+
+def visible_items() -> list:
+    img = screen.screenshot()
+    result = ocr_engine.recognize_roi(img, config.CATALOG_ROI)
+
+    items = []
+    for text, box in zip(result["txts"], result["boxes"]):
+        text = normalize(text)
+        if text and is_catalog_item(text):
+            cx = int(box[:, 0].mean())
+            cy = int(box[:, 1].mean())
+            items.append((text, cx, cy))
+
+    items.sort(key=lambda item: item[2])
+    return items
+
+
+def scroll_to_top() -> None:
+    prev = None
+    for _ in range(config.MAX_ROLLS):
+        current = frozenset(_visible_titles())
+        if prev is not None and current == prev:
+            break
+        prev = current
+        screen.scroll_in_roi(config.CATALOG_ROI, config.SCROLL_UP)
+        time.sleep(1)
