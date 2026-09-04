@@ -81,6 +81,13 @@ def wait_completion(timeout: int) -> bool:
 def run() -> None:
     catalog.scroll_to_top()
 
+    leaf_numbers = catalog.collect_leaf_numbers()
+    if not leaf_numbers:
+        log("未识别到最低级课程编号，请确认已登录并停留在学习通课程页")
+        return
+
+    catalog.scroll_to_top()
+
     done = set()
 
     while True:
@@ -91,7 +98,8 @@ def run() -> None:
 
         target = None
         for item in items:
-            if item[0] not in done:
+            number = catalog.parse_number(item[0])
+            if number is not None and number in leaf_numbers and number not in done:
                 target = item
                 break
 
@@ -106,6 +114,7 @@ def run() -> None:
             continue
 
         title, cx, cy = target
+        number = catalog.parse_number(title)
         log(f"处理课程: {title}")
 
         screen.click(cx, cy)
@@ -121,7 +130,7 @@ def run() -> None:
                 log(f"超时未完成: {title}，请人工处理，处理后按回车继续")
                 input()
 
-        done.add(title)
+        done.add(number)
         log(f"已处理 {len(done)} 项")
 
     log("全部课程处理完毕")

@@ -17,16 +17,27 @@ def _fullscreen_rect():
 
 def _process_name(pid: int) -> str:
     kernel32 = ctypes.windll.kernel32
-    psapi = ctypes.windll.psapi
     PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
+
+    kernel32.OpenProcess.restype = wintypes.HANDLE
+    kernel32.OpenProcess.argtypes = [wintypes.DWORD, wintypes.BOOL, wintypes.DWORD]
+    kernel32.CloseHandle.argtypes = [wintypes.HANDLE]
 
     handle = kernel32.OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, False, pid)
     if not handle:
         return ""
     try:
+        query = kernel32.K32QueryFullProcessImageNameW
+        query.restype = wintypes.BOOL
+        query.argtypes = [
+            wintypes.HANDLE,
+            wintypes.DWORD,
+            ctypes.c_wchar_p,
+            ctypes.POINTER(wintypes.DWORD),
+        ]
         buffer = ctypes.create_unicode_buffer(260)
-        size = ctypes.c_ulong(260)
-        if psapi.QueryFullProcessImageNameW(handle, 0, buffer, ctypes.byref(size)):
+        size = wintypes.DWORD(260)
+        if query(handle, 0, buffer, ctypes.byref(size)):
             return os.path.basename(buffer.value).lower()
         return ""
     finally:

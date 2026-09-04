@@ -7,6 +7,7 @@ import screen
 
 ITEM_RE = re.compile(r"^\d")
 LETTER_RE = re.compile(r"[\u4e00-\u9fa5A-Za-z]")
+NUMBER_RE = re.compile(r"^\s*(\d+(?:\.\d+)*)")
 
 
 def normalize(text: str) -> str:
@@ -22,6 +23,25 @@ def is_catalog_item(text: str) -> bool:
     return bool(LETTER_RE.search(text))
 
 
+def parse_number(text: str):
+    match = NUMBER_RE.match(text)
+    if not match:
+        return None
+    return tuple(int(part) for part in match.group(1).split("."))
+
+
+def filter_leaves(numbers: set) -> set:
+    nums = list(numbers)
+    leaves = set()
+    for number in nums:
+        if not any(
+            len(other) > len(number) and other[: len(number)] == number
+            for other in nums
+        ):
+            leaves.add(number)
+    return leaves
+
+
 def _visible_titles() -> list:
     img = screen.screenshot()
     result = ocr_engine.recognize_roi(img, config.CATALOG_ROI)
@@ -33,9 +53,8 @@ def _visible_titles() -> list:
     return titles
 
 
-def collect_catalog() -> list:
-    titles = []
-    seen = set()
+def collect_leaf_numbers() -> set:
+    numbers = set()
     prev = None
 
     for _ in range(config.MAX_ROLLS):
@@ -46,34 +65,17 @@ def collect_catalog() -> list:
             break
         prev = current
 
-        for title in visible:
-            if title not in seen:
-                seen.add(title)
-                titles.append(title)
-
-        if not visible:
-            break
+        for text in visible:
+            number = parse_number(text)
+            if number is not None:
+                numbers.add(number)
 
         screen.scroll_in_roi(config.CATALOG_ROI, config.SCROLL_STEPS)
         time.sleep(1)
 
-    print(f"[catalog] 收集到 {len(titles)} 个课程项")
-    return titles
-
-
-def locate_item(title: str):
-    img = screen.screenshot()
-    result = ocr_engine.recognize_roi(img, config.CATALOG_ROI)
-
-    for text, box in zip(result["txts"], result["boxes"]):
-        text = normalize(text)
-        if not text:
-            continue
-        if text == title or title in text or text in title:
-            cx = int(box[:, 0].mean())
-            cy = int(box[:, 1].mean())
-            return cx, cy
-    return None
+    leaves = filter_leaves(numbers)
+    print(f"[catalog] 共识别 {len(numbers)} 个编号，其中最低级 {len(leaves)} 个")
+    return leaves
 
 
 def visible_items() -> list:
