@@ -1,3 +1,7 @@
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 TARGET_URL = "https://i.chaoxing.com"
 
 WAIT_SECONDS = 5
@@ -8,7 +12,7 @@ CHROME_CANDIDATE_PATHS = [
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
     r"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe",
     r"C:\Users\{}\AppData\Local\Google\Chrome\Application\chrome.exe".format(
-        __import__("os").environ.get("USERNAME", "")
+        os.environ.get("USERNAME", "")
     ),
 ]
 
@@ -35,3 +39,14 @@ SCROLL_STEPS = -400
 SCROLL_UP = 400
 
 MAX_ROLLS = 12
+
+PLAY_BUTTON_TEMPLATE = os.path.join(BASE_DIR, "assets", "play_button.png")
+
+MATCH_THRESHOLD = 0.75
+
+MATCH_SCALE_MIN = 0.5
+
+MATCH_SCALE_MAX = 2.0
+
+MATCH_SCALE_STEP = 0.05
+

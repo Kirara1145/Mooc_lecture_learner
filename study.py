@@ -6,6 +6,7 @@ import catalog
 import config
 import ocr_engine
 import screen
+import template
 
 LOG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs", "study.log")
 
@@ -48,10 +49,17 @@ def click_play_button() -> bool:
     offsets = (0, 0), (-40, 0), (40, 0), (0, -40), (0, 40), (0, -80), (0, 80)
 
     for attempt in range(config.MAX_PLAY_RETRY):
-        dx, dy = offsets[attempt % len(offsets)]
-        x, y = cx + dx, cy + dy
-        log(f"尝试点击播放按钮 ({x}, {y})")
-        screen.click(x, y)
+        matched = template.find_template(config.VIDEO_ROI)
+        if matched:
+            x, y, score = matched
+            log(f"[图像匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
+            screen.click(x, y)
+        else:
+            dx, dy = offsets[attempt % len(offsets)]
+            x, y = cx + dx, cy + dy
+            log(f"[坐标回退] 点击 ({x}, {y})")
+            screen.click(x, y)
+
         time.sleep(config.POLL_INTERVAL)
         if is_playing():
             log("视频开始播放")

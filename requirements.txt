@@ -3,3 +3,4 @@ openvino
 pyautogui
 pillow
 numpy
+opencv-python
