@@ -11,17 +11,15 @@
 
 ## 配置指南
 ### 下载浏览器
-本软件仅支持Chrome浏览器
+本软件仅支持Chrome浏览器，自行下载浏览器或者：
 ```cmd
-#Winget安装chrome
-winget install Google.chrome
+winget install Google.Chrome
 ```
 
 ### 安装依赖
 在项目文件夹右键空白处，选择“在终端中打开”
 输入命令：
 ```cmd
-#安装所有依赖
 pip install -r requirements.txt
 ```
 ## 运行
