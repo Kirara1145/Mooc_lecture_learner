@@ -4,3 +4,4 @@ pyautogui
 pillow
 numpy
 opencv-python
+pyyaml
