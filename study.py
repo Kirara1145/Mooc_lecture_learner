@@ -15,6 +15,7 @@ def is_completed() -> bool:
     img = screen.screenshot()
     result = ocr_engine.recognize_roi(img, config.TITLE_ROI)
     text = "".join(catalog.normalize(t) for t in result["txts"])
+    logger.info(f"[诊断] TITLE_ROI 识别文字: {text!r}")
     for keyword in config.COMPLETION_KEYWORDS:
         if keyword.replace(" ", "") in text:
             return True
