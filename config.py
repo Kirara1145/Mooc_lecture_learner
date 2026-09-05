@@ -11,10 +11,16 @@ def _load_config():
     with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
 
-    template = data.get("play_button_template")
-    if template:
-        data["PLAY_BUTTON_TEMPLATE"] = os.path.join(BASE_DIR, template)
-    data.pop("play_button_template", None)
+    template_keys = {
+        "play_button_template": "PLAY_BUTTON_TEMPLATE",
+        "mission_complete_template": "MISSION_COMPLETE_TEMPLATE",
+        "mission_incomplete_template": "MISSION_INCOMPLETE_TEMPLATE",
+    }
+    for yaml_key, py_key in template_keys.items():
+        value = data.get(yaml_key)
+        if value:
+            data[py_key] = os.path.join(BASE_DIR, value)
+        data.pop(yaml_key, None)
 
     username = os.environ.get("USERNAME", "")
     paths = data.get("CHROME_CANDIDATE_PATHS") or []
@@ -50,6 +56,12 @@ SCROLL_UP = 400
 MAX_ROLLS = 12
 
 PLAY_BUTTON_TEMPLATE = os.path.join(BASE_DIR, "assets", "play_button.png")
+
+MISSION_COMPLETE_TEMPLATE = os.path.join(BASE_DIR, "assets", "mission_complete.png")
+
+MISSION_INCOMPLETE_TEMPLATE = os.path.join(BASE_DIR, "assets", "mission_incomplete.png")
+
+MISSION_MATCH_THRESHOLD = 0.8
 
 MATCH_THRESHOLD = 0.75
 

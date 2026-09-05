@@ -41,6 +41,12 @@ MAX_ROLLS: 12
 
 play_button_template: "assets/play_button.png"
 
+mission_complete_template: "assets/mission_complete.png"
+
+mission_incomplete_template: "assets/mission_incomplete.png"
+
+MISSION_MATCH_THRESHOLD: 0.8
+
 MATCH_THRESHOLD: 0.75
 
 MATCH_SCALE_MIN: 0.5

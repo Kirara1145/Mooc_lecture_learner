@@ -4,22 +4,24 @@ import numpy as np
 import config
 import screen
 
-_template_cache = None
+_template_cache = {}
 
 
-def _load_template():
-    global _template_cache
-    if _template_cache is None:
-        _template_cache = cv2.imread(config.PLAY_BUTTON_TEMPLATE, cv2.IMREAD_GRAYSCALE)
-        if _template_cache is None:
-            raise FileNotFoundError(
-                f"无法加载播放按钮模板: {config.PLAY_BUTTON_TEMPLATE}"
-            )
-    return _template_cache
+def _load_template(template_path: str):
+    if template_path not in _template_cache:
+        tpl = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
+        if tpl is None:
+            raise FileNotFoundError(f"无法加载模板: {template_path}")
+        _template_cache[template_path] = tpl
+    return _template_cache[template_path]
 
 
-def find_template(roi=None):
-    tpl = _load_template()
+def find_template(roi=None, template_path: str = None, threshold: float = None):
+    path = template_path or config.PLAY_BUTTON_TEMPLATE
+    if threshold is None:
+        threshold = config.MATCH_THRESHOLD
+
+    tpl = _load_template(path)
     template_h, template_w = tpl.shape
 
     img = screen.screenshot()
@@ -66,10 +68,20 @@ def find_template(roi=None):
 
         scale += config.MATCH_SCALE_STEP
 
-    if best is None or best_score < config.MATCH_THRESHOLD:
+    if best is None or best_score < threshold:
         return None
 
     loc_x, loc_y, new_w, new_h = best
     center_x = ox + loc_x + new_w // 2
     center_y = oy + loc_y + new_h // 2
     return center_x, center_y, best_score
+
+
+def find_complete():
+    return find_template(template_path=config.MISSION_COMPLETE_TEMPLATE,
+                         threshold=config.MISSION_MATCH_THRESHOLD)
+
+
+def find_incomplete():
+    return find_template(template_path=config.MISSION_INCOMPLETE_TEMPLATE,
+                         threshold=config.MISSION_MATCH_THRESHOLD)

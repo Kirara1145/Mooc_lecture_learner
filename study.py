@@ -11,15 +11,23 @@ from logger import get_logger
 logger = get_logger("study")
 
 
+def mission_status() -> str:
+    complete = template.find_complete()
+    incomplete = template.find_incomplete()
+
+    if complete and incomplete:
+        return "complete" if complete[2] >= incomplete[2] else "incomplete"
+    if complete:
+        logger.info(f"[图像匹配] 检测到任务已完成 ({complete[0]}, {complete[1]}) score={complete[2]:.3f}")
+        return "complete"
+    if incomplete:
+        logger.info(f"[图像匹配] 检测到任务未完成 ({incomplete[0]}, {incomplete[1]}) score={incomplete[2]:.3f}")
+        return "incomplete"
+    return "unknown"
+
+
 def is_completed() -> bool:
-    img = screen.screenshot()
-    result = ocr_engine.recognize_roi(img, config.TITLE_ROI)
-    text = "".join(catalog.normalize(t) for t in result["txts"])
-    logger.info(f"[诊断] TITLE_ROI 识别文字: {text!r}")
-    for keyword in config.COMPLETION_KEYWORDS:
-        if keyword.replace(" ", "") in text:
-            return True
-    return False
+    return mission_status() == "complete"
 
 
 def is_playing() -> bool:
@@ -116,8 +124,17 @@ def run() -> None:
         screen.click(cx, cy)
         time.sleep(config.WAIT_SECONDS)
 
-        if is_completed():
+        status = mission_status()
+        for _ in range(3):
+            if status != "unknown":
+                break
+            time.sleep(2)
+            status = mission_status()
+
+        if status == "complete":
             logger.info("已显示任务完成，跳过")
+        elif status == "unknown":
+            logger.info(f"无法确认任务状态: {title}，请人工检查")
         else:
             click_play_button()
             if wait_completion(config.COURSE_TIMEOUT):
