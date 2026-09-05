@@ -11,7 +11,7 @@
 
 ## 配置指南
 ### 安装python
-本程序开发于Python3.12环境，理论上Python3.12+均可运行/n
+本程序开发于Python3.12环境，理论上Python3.12+均可运行 \n
 在官网下载安装Python，或者：
 ```cmd
 winget install Python.Python.3.12
