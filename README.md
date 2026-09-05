@@ -10,6 +10,12 @@
 注意⚠️：本软件仅能在Win10/11（arm64）上测试过
 
 ## 配置指南
+### 安装python
+本程序开发于Python3.12环境，理论上Python3.12+均可运行/n
+在官网下载安装Python，或者：
+```cmd
+winget install Python.Python.3.12
+```
 ### 下载浏览器
 本软件仅支持Chrome浏览器，自行下载浏览器或者：
 ```cmd
