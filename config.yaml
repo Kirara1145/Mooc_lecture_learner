@@ -21,6 +21,14 @@ VIDEO_CENTER: [0.40, 0.68]
 
 VIDEO_ROI: [0.02, 0.28, 0.72, 0.86]
 
+# 启动视频播放的方式:
+#   "space" = 向视频界面发送按键(默认空格)开始播放, 需要 Chrome 窗口处于焦点
+#   "click" = 用边缘模板匹配定位播放键并点击
+PLAY_METHOD: "space"
+
+# 当 PLAY_METHOD 为 "space" 时发送的按键名称(pyautogui 键名, 如 space/enter)
+PLAY_KEY: "space"
+
 MAX_PLAY_RETRY: 6
 
 VERIFY_PLAYBACK: false

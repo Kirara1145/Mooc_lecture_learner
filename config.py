@@ -37,6 +37,10 @@ VIDEO_CENTER = (0.40, 0.68)
 
 VIDEO_ROI = (0.02, 0.28, 0.72, 0.86)
 
+PLAY_METHOD = "space"
+
+PLAY_KEY = "space"
+
 MAX_PLAY_RETRY = 6
 
 VERIFY_PLAYBACK = False

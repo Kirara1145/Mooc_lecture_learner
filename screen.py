@@ -39,6 +39,11 @@ def click(x: int, y: int) -> None:
     pyautogui.click(x, y)
 
 
+def press(key: str) -> None:
+    logger.info(f"按键: {key}")
+    pyautogui.press(key)
+
+
 def click_all(points) -> None:
     for point in points:
         x, y = point

@@ -41,29 +41,41 @@ def is_playing() -> bool:
     return False
 
 
-def click_play_button() -> bool:
+def _click_play_button_once(attempt: int) -> None:
     cx, cy = screen.frac_point(*config.VIDEO_CENTER)
 
     offsets = (0, 0), (-40, 0), (40, 0), (0, -40), (0, 40), (0, -80), (0, 80)
 
-    def click_once(attempt: int) -> None:
-        matched = template.find_play_button()
-        if matched:
-            x, y, score = matched
-            logger.info(f"[边缘匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
-        else:
-            dx, dy = offsets[attempt % len(offsets)]
-            x, y = cx + dx, cy + dy
-            logger.info(f"[坐标回退] 点击 ({x}, {y})")
-        screen.click(x, y)
+    matched = template.find_play_button()
+    if matched:
+        x, y, score = matched
+        logger.info(f"[边缘匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
+    else:
+        dx, dy = offsets[attempt % len(offsets)]
+        x, y = cx + dx, cy + dy
+        logger.info(f"[坐标回退] 点击 ({x}, {y})")
+    screen.click(x, y)
+
+
+def _press_play_key_once(attempt: int) -> None:
+    screen.content_rect()
+    screen.press(config.PLAY_KEY)
+
+
+def start_playback() -> bool:
+    play_once = (
+        _press_play_key_once
+        if config.PLAY_METHOD == "space"
+        else _click_play_button_once
+    )
 
     if not config.VERIFY_PLAYBACK:
-        click_once(0)
+        play_once(0)
         logger.info("已关闭播放验证，视为开始播放")
         return True
 
     for attempt in range(config.MAX_PLAY_RETRY):
-        click_once(attempt)
+        play_once(attempt)
         time.sleep(config.PLAY_VERIFY_DELAY)
         if is_playing():
             logger.info("视频开始播放")
@@ -136,7 +148,7 @@ def run() -> None:
         elif status == "unknown":
             logger.info(f"无法确认任务状态: {title}，请人工检查")
         else:
-            click_play_button()
+            start_playback()
             if wait_completion(config.COURSE_TIMEOUT):
                 logger.info(f"完成: {title}")
             else:
