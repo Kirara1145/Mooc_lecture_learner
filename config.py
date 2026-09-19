@@ -41,6 +41,8 @@ PLAY_METHOD = "space"
 
 PLAY_KEY = "space"
 
+PLAY_FOCUS_CLICK = True
+
 MAX_PLAY_RETRY = 6
 
 VERIFY_PLAYBACK = False

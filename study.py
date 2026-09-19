@@ -41,7 +41,7 @@ def is_playing() -> bool:
     return False
 
 
-def _click_play_button_once(attempt: int) -> None:
+def _video_point(attempt: int):
     cx, cy = screen.frac_point(*config.VIDEO_CENTER)
 
     offsets = (0, 0), (-40, 0), (40, 0), (0, -40), (0, 40), (0, -80), (0, 80)
@@ -49,16 +49,26 @@ def _click_play_button_once(attempt: int) -> None:
     matched = template.find_play_button()
     if matched:
         x, y, score = matched
-        logger.info(f"[边缘匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
-    else:
-        dx, dy = offsets[attempt % len(offsets)]
-        x, y = cx + dx, cy + dy
-        logger.info(f"[坐标回退] 点击 ({x}, {y})")
+        logger.info(f"[边缘匹配] 视频位置 ({x}, {y}) score={score:.3f}")
+        return x, y
+
+    dx, dy = offsets[attempt % len(offsets)]
+    x, y = cx + dx, cy + dy
+    logger.info(f"[坐标回退] 视频位置 ({x}, {y})")
+    return x, y
+
+
+def _click_play_button_once(attempt: int) -> None:
+    x, y = _video_point(attempt)
     screen.click(x, y)
 
 
 def _press_play_key_once(attempt: int) -> None:
     screen.content_rect()
+    if config.PLAY_FOCUS_CLICK:
+        x, y = _video_point(attempt)
+        logger.info(f"[焦点点击] 先点击视频界面 ({x}, {y})")
+        screen.click(x, y)
     screen.press(config.PLAY_KEY)
 
 

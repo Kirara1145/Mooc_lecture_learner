@@ -29,6 +29,10 @@ PLAY_METHOD: "space"
 # 当 PLAY_METHOD 为 "space" 时发送的按键名称(pyautogui 键名, 如 space/enter)
 PLAY_KEY: "space"
 
+# PLAY_METHOD 为 "space" 时, 按空格前是否先点击视频界面使其获得焦点
+# (部分平台需先点击视频区域, 空格键才会生效)
+PLAY_FOCUS_CLICK: true
+
 MAX_PLAY_RETRY: 6
 
 VERIFY_PLAYBACK: false
