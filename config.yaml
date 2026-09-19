@@ -33,6 +33,10 @@ PLAY_KEY: "space"
 # (部分平台需先点击视频区域, 空格键才会生效)
 PLAY_FOCUS_CLICK: true
 
+# PLAY_METHOD 为 "space" 时, 焦点点击的位置(相对窗口内容区的比例)
+# 默认窗口中央, 避开播放键, 防止点击直接开始播放后又被空格暂停
+PLAY_FOCUS_POINT: [0.5, 0.5]
+
 # PLAY_METHOD 为 "space" 时, 点击视频界面后等待多少秒再按空格(秒)
 PLAY_FOCUS_DELAY: 1
 
