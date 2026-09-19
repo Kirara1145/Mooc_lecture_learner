@@ -33,6 +33,9 @@ PLAY_KEY: "space"
 # (部分平台需先点击视频区域, 空格键才会生效)
 PLAY_FOCUS_CLICK: true
 
+# PLAY_METHOD 为 "space" 时, 点击视频界面后等待多少秒再按空格(秒)
+PLAY_FOCUS_DELAY: 1
+
 MAX_PLAY_RETRY: 6
 
 VERIFY_PLAYBACK: false

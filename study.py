@@ -69,6 +69,7 @@ def _press_play_key_once(attempt: int) -> None:
         x, y = _video_point(attempt)
         logger.info(f"[焦点点击] 先点击视频界面 ({x}, {y})")
         screen.click(x, y)
+        time.sleep(config.PLAY_FOCUS_DELAY)
     screen.press(config.PLAY_KEY)
 
 
