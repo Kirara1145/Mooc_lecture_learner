@@ -47,10 +47,10 @@ def click_play_button() -> bool:
     offsets = (0, 0), (-40, 0), (40, 0), (0, -40), (0, 40), (0, -80), (0, 80)
 
     def click_once(attempt: int) -> None:
-        matched = template.find_template(config.VIDEO_ROI)
+        matched = template.find_play_button()
         if matched:
             x, y, score = matched
-            logger.info(f"[图像匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
+            logger.info(f"[边缘匹配] 播放按钮 ({x}, {y}) score={score:.3f}")
         else:
             dx, dy = offsets[attempt % len(offsets)]
             x, y = cx + dx, cy + dy

@@ -7,6 +7,17 @@ import screen
 _template_cache = {}
 
 
+def _to_gray(img):
+    if img.ndim == 3:
+        return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    return img
+
+
+def _to_edge(gray):
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    return cv2.Canny(blurred, config.CANNY_LOW, config.CANNY_HIGH)
+
+
 def _load_template(template_path: str):
     if template_path not in _template_cache:
         tpl = cv2.imread(template_path, cv2.IMREAD_GRAYSCALE)
@@ -16,19 +27,21 @@ def _load_template(template_path: str):
     return _template_cache[template_path]
 
 
-def find_template(roi=None, template_path: str = None, threshold: float = None):
+def find_template(roi=None, template_path: str = None, threshold: float = None,
+                  use_edge: bool = False):
     path = template_path or config.PLAY_BUTTON_TEMPLATE
     if threshold is None:
         threshold = config.MATCH_THRESHOLD
 
     tpl = _load_template(path)
+    if use_edge:
+        tpl = _to_edge(tpl)
     template_h, template_w = tpl.shape
 
     img = screen.screenshot()
-    if img.ndim == 3:
-        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    else:
-        gray = img
+    gray = _to_gray(img)
+    if use_edge:
+        gray = _to_edge(gray)
 
     left, top, width, height = screen.content_rect()
     if roi is None:
@@ -75,6 +88,14 @@ def find_template(roi=None, template_path: str = None, threshold: float = None):
     center_x = ox + loc_x + new_w // 2
     center_y = oy + loc_y + new_h // 2
     return center_x, center_y, best_score
+
+
+def find_play_button():
+    return find_template(
+        template_path=config.PLAY_BUTTON_TEMPLATE,
+        threshold=config.EDGE_MATCH_THRESHOLD,
+        use_edge=True,
+    )
 
 
 def find_complete():
